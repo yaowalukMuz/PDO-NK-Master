@@ -9,18 +9,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".JobListActivity" />
         <activity android:name=".ManageJobActivity" />
         <activity android:name=".DateActivity" />
         <activity android:name=".DetailJobActivity" />
         <activity android:name=".SignatureActivity" />
-        <activity android:name=".ReturnActivity"></activity>
+        <activity android:name=".ReturnActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter></activity>
         <meta-data android:name="io.fabric.ApiKey" android:value="cb5d4c3d49eea37d1668dc88f85df56d9d55bcce" />
     </application>
 

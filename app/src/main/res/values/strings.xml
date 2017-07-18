@@ -31,7 +31,7 @@
     <string name="RetQuantity">Return QTY</string>
     <string name="ReturnAll">Return All</string>
     <string name="Finish">Finish</string>
-    <string name="InvoiceNo">Invoice No</string>
+    <string name="InvoiceNo">Inv No</string>
     <string name="Logo">Logo</string>
     <string name="Header">Header</string>
     <string name="Descript">Descript</string>
@@ -40,4 +40,9 @@
     <string name="Time">Time</string>
     <string name="Job">Job</string>
     <string name="Trip">Trip</string>
+    <string name="model">model</string>
+    <string name="ProductDesc">Detail</string>
+    <string name="ProductAmount">Amt</string>
+    <string name="ProductReturn">Return</string>
+    <string name="Desc">Description</string>
 </resources>

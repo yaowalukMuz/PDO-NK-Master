@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -19,18 +21,17 @@ public class ReturnProductAdaptor extends BaseAdapter {
     private Context context;
     private String[] modelStrings, detailStrings, amountStrings, returnQtyStrings;
     ReturnListViewHolder productListViewHolder;
+    private ArrayList<ReturnItem> returnItems;
 
-    public ReturnProductAdaptor(Context context, String[] modelStrings, String[] detailStrings, String[] amountStrings, String[] returnQtyStrings) {
+    public ReturnProductAdaptor(Context context, ArrayList<ReturnItem> returnItems) {
         this.context = context;
-        this.modelStrings = modelStrings;
-        this.detailStrings = detailStrings;
-        this.amountStrings = amountStrings;
-        this.returnQtyStrings = returnQtyStrings;
+        this.returnItems = returnItems;
     }
+
 
     @Override
     public int getCount() {
-        return modelStrings.length;
+        return returnItems.size();
     }
 
     @Override
@@ -54,18 +55,20 @@ public class ReturnProductAdaptor extends BaseAdapter {
             productListViewHolder = (ReturnListViewHolder) convertView.getTag();
         }
 
-        String text = convertView.getResources().getString(R.string.Model) + " : " + modelStrings[position];
+
+       String text = convertView.getResources().getString(R.string.Model) + " : " + returnItems.get(position).getModelString();
         productListViewHolder.modelTextView.setText(text);
-        text = convertView.getResources().getString(R.string.Desc) + " : " + detailStrings[position];
+        text = convertView.getResources().getString(R.string.Desc) + " : " + returnItems.get(position).getDescriptionString();
         productListViewHolder.detailTextView.setText(text);
-        text = convertView.getResources().getString(R.string.Quantity) + " : " + amountStrings[position];
+        text = convertView.getResources().getString(R.string.Quantity) + " : " + returnItems.get(position).getAmountString();
         productListViewHolder.amountTextView.setText(text);
-        text = convertView.getResources().getString(R.string.RetQuantity) + " : " + returnQtyStrings[position];
+        text = convertView.getResources().getString(R.string.RetQuantity) + " : " + returnItems.get(position).getRetrunAmountString();
         productListViewHolder.returnAmtTextView.setText(text);
 
 
         return convertView;
     }
+
 
     class ReturnListViewHolder {
         @BindView(R.id.textView)

@@ -45,4 +45,5 @@
     <string name="ProductAmount">Amt</string>
     <string name="ProductReturn">Return</string>
     <string name="Desc">Description</string>
+    <string name="retrunBtn">Confirm</string>
 </resources>

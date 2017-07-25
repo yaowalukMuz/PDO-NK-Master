@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -33,6 +34,7 @@ import butterknife.OnClick;
 import butterknife.OnItemClick;
 
 import static com.mist.it.pod_nk.MyConstant.urlGetJobDetailProduct;
+import static com.mist.it.pod_nk.MyConstant.urlSaveQuantityReturnAll;
 import static com.mist.it.pod_nk.MyConstant.urlSaveQuantityReturnByItem;
 
 public class ReturnActivity extends AppCompatActivity {
@@ -53,11 +55,12 @@ public class ReturnActivity extends AppCompatActivity {
     ListView itemListView;
 
 
-    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings;
-    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings;
+    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings, loginStrings;
+    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings;
     private ArrayList<ReturnItem> returnItems = new ArrayList<ReturnItem>();
     DialogViewHolder dialogViewHolder;
     AlertMessageViewHolder alertMessageViewHolder;
+    ConfirmReturnAllViewHolder confirmReturnAllViewHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,23 +69,13 @@ public class ReturnActivity extends AppCompatActivity {
 
         //1. Bind Widget
         ButterKnife.bind(this);
+
         // 2.create class for synDataAdaptor to listview
         SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, "", "", returnItems);
         synJobDtlProduct.execute(urlGetJobDetailProduct);
 
 
     }// main Method
-
-
-//    @OnClick({R.id.button3, R.id.button2})
-//    public void onViewClicked(View view) {
-//        switch (view.getId()) {
-//            case R.id.button3:
-//                break;
-//            case R.id.button2:
-//                break;
-//        }
-//    }
 
 
     //Set On Click Listener
@@ -92,6 +85,29 @@ public class ReturnActivity extends AppCompatActivity {
             case R.id.btnRASave:
                 break;
             case R.id.btnRAReturnAll:
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ReturnActivity.this);
+                View view1 = View.inflate(getBaseContext(), R.layout.custom_alert, null);
+
+                confirmReturnAllViewHolder = new ConfirmReturnAllViewHolder(view1);
+
+                confirmReturnAllViewHolder.imgRtnAImageView.setImageResource(R.drawable.caution);
+                confirmReturnAllViewHolder.headerRtnTextView.setText("return all product");
+                confirmReturnAllViewHolder.descriptRtnTextView.setText("Are you sure return all...?");
+                builder.setPositiveButton(getResources().getText(R.string.OK), new DialogInterface.OnClickListener(){
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SyncReturnAll syncReturnAll = new SyncReturnAll(ReturnActivity.this, invoiceNoStrings[0]);
+                                syncReturnAll.execute(urlSaveQuantityReturnAll);
+                            }
+                        });
+                builder.setView(view1);
+                builder.show();
+
+
+//
                 break;
             case R.id.btnRAConfirm:
                 break;
@@ -100,34 +116,41 @@ public class ReturnActivity extends AppCompatActivity {
 
     @OnItemClick(R.id.lisRAItemList)
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-       // Log.d("Tag", "onItemSelected: " + position);
+        // Log.d("Tag", "onItemSelected: " + position);
 
         //event onclick listview
         final View view1 = View.inflate(getBaseContext(), R.layout.dialog_return, null);
-        final View view2 = View.inflate(getBaseContext(), R.layout.custom_alert, null);
+        //final View view2 = View.inflate(getBaseContext(), R.layout.custom_alert, null);
 
         dialogViewHolder = new DialogViewHolder(view1);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(ReturnActivity.this);
         dialogViewHolder.titleTextview.setText("Return : " + returnItems.get(position).getModelString());
         dialogViewHolder.amtTxtTextview.setText("Amount : ");
+        dialogViewHolder.amtRtnEditText.setText(returnItems.get(position).getRetrunAmountString());
         builder.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                    if (Integer.parseInt(dialogViewHolder.amtRtnEditText.getText().toString()) < Integer.parseInt(returnItems.get(position).getAmountString())) {
-                        SyncUpdateTurn syncUpdateTurn = new SyncUpdateTurn(ReturnActivity.this, returnItems.get(position).getInvoiceNoString(),
-                                returnItems.get(position).getInvoiceSeqString(), returnItems.get(position).getModelString(),
-                                returnItems.get(position).getRetrunAmountString());
-                        syncUpdateTurn.execute(urlSaveQuantityReturnByItem);
-                    } else {
-                        AlertDialog.Builder builder1 = new AlertDialog.Builder(ReturnActivity.this);
-                       // alertMessageViewHolder.imgAlertImageView.setImageResource(R.drawable.caution);
-                        alertMessageViewHolder.headerTextView.setText("Over amount");
-                        alertMessageViewHolder.descriptTextView.setText("Please check return amount is over");
-                        builder1.setView(view2);
-                        builder1.show();
-                    }
+                if (Integer.parseInt(dialogViewHolder.amtRtnEditText.getText().toString()) < Integer.parseInt(returnItems.get(position).getAmountString())) {
+                    SyncUpdateTurn syncUpdateTurn = new SyncUpdateTurn(ReturnActivity.this, returnItems.get(position).getInvoiceNoString(),
+                            returnItems.get(position).getInvoiceSeqString(), returnItems.get(position).getModelString(),
+                            dialogViewHolder.amtRtnEditText.getText().toString());
+                    syncUpdateTurn.execute(urlSaveQuantityReturnByItem);
+                    returnItems.get(position).setRetrunAmountString(dialogViewHolder.amtRtnEditText.getText().toString());
+                    ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
+
+                    itemListView.setAdapter(returnProductAdaptor);
+                } else {
+                    Toast toast = Toast.makeText(ReturnActivity.this, "over amount", Toast.LENGTH_LONG);
+                    toast.show();
+//                        AlertDialog.Builder builder1 = new AlertDialog.Builder(ReturnActivity.this);
+//                       // alertMessageViewHolder.imgAlertImageView.setImageResource(R.drawable.caution);
+//                        alertMessageViewHolder.headerTextView.setText("Over amount");
+//                        alertMessageViewHolder.descriptTextView.setText("Please check return amount is over");
+//                        builder1.setView(view2);
+//                        builder1.show();
+                }
 
 
             }
@@ -149,8 +172,8 @@ public class ReturnActivity extends AppCompatActivity {
     //inner class for syn data from adaptor
     protected class SynJobDtlProduct extends AsyncTask<String, Void, String> {
 
-        private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings;
-        private String[] invoiceNoStrings, subJobStrings, imgFileNameStrings;
+//        private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings;
+//        private String[] invoiceNoStrings, subJobStrings, imgFileNameStrings;
         //Explicit
         private Context context;
         private String subjob_no, invoiceNo;
@@ -196,13 +219,14 @@ public class ReturnActivity extends AppCompatActivity {
                 JSONArray jsonArray = jsonObject.getJSONArray("data");
 
                 invoiceNoStrings = new String[jsonArray.length()];
+
                 subJobStrings = new String[jsonArray.length()];
                 imgFileNameStrings = new String[jsonArray.length()];
                 modelStrings = new String[jsonArray.length()][];
                 amountStrings = new String[jsonArray.length()][];
                 detailStrings = new String[jsonArray.length()][];
                 returnAmountStrings = new String[jsonArray.length()][];
-
+                invoiceNoSeqStrings = new String[jsonArray.length()][];
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
@@ -216,6 +240,8 @@ public class ReturnActivity extends AppCompatActivity {
                     amountStrings[i] = new String[productArray.length()];
                     detailStrings[i] = new String[productArray.length()];
                     returnAmountStrings[i] = new String[productArray.length()];
+                    invoiceNoSeqStrings[i] = new String[productArray.length()];
+
 
                     for (int j = 0; j < productArray.length(); j++) {
                         JSONObject jsonObject2 = productArray.getJSONObject(j);
@@ -223,11 +249,15 @@ public class ReturnActivity extends AppCompatActivity {
                         amountStrings[i][j] = jsonObject2.getString("Quantity");
                         detailStrings[i][j] = jsonObject2.getString("Product1");
                         returnAmountStrings[i][j] = jsonObject2.getString("QTYRT");
+                        invoiceNoSeqStrings[i][j] = jsonObject2.getString("InvoiceSeqn");
 
                         ReturnItem returnItem = new ReturnItem();
                         returnItem.setModelString(jsonObject2.getString("Product"));
+                        returnItem.setDescriptionString(jsonObject2.getString("Product1"));
                         returnItem.setRetrunAmountString(jsonObject2.getString("QTYRT"));
                         returnItem.setAmountString(jsonObject2.getString("Quantity"));
+                        returnItem.setInvoiceSeqString(jsonObject2.getString("InvoiceSeqn"));
+                        returnItem.setInvoiceNoString(invoiceNoStrings[0]);
                         returnItmes.add(returnItem);
                         Log.d("Tag", "returnItem: " + returnItmes);
 
@@ -264,6 +294,7 @@ public class ReturnActivity extends AppCompatActivity {
             this.invoiceSeqString = invoiceSeqString;
             this.modelString = modelString;
             this.amountReturnString = amountReturnString;
+
         }
 
 
@@ -277,17 +308,25 @@ public class ReturnActivity extends AppCompatActivity {
             super.onPostExecute(s);
 
             Log.d("Tag", "onPostExecute:->return save return product:::::  " + s);
+
         }
 
         @Override
         protected String doInBackground(String... params) {
             try {
+
+                GPSManager gpsManager = new GPSManager(ReturnActivity.this);
+
                 OkHttpClient okHttpClient = new OkHttpClient();
                 RequestBody requestBody = new FormEncodingBuilder()
                         .add("isAdd", "true")
+                        .add("user_name", "70-4997")
+                        .add("subjob_no", "ND-170517-0050")
                         .add("invoiceNo", invoiceNoString)
+                        .add("invoiceSeq", invoiceSeqString)
                         .add("model", modelString)
-                        .add("amountReturn", amountReturnString).build();
+                        .add("gps_timeStamp", gpsManager.getDateTime())
+                        .add("Quantity", amountReturnString).build();
                 Request.Builder builder = new Request.Builder();
                 Request request = builder.post(requestBody).url(urlSaveQuantityReturnByItem).build();
                 Response response = okHttpClient.newCall(request).execute();
@@ -298,10 +337,44 @@ public class ReturnActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return null;
             }
-
-
         }
 
+    }
+
+    private class SyncReturnAll extends AsyncTask<String, Void, String> {
+
+        private Context context;
+        private String invoiceNoString;
+
+        public SyncReturnAll(Context context, String invoiceNoString) {
+            this.context = context;
+            this.invoiceNoString = invoiceNoString;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                RequestBody requestBody = new FormEncodingBuilder()
+                        .add("isAdd", "true")
+                        .add("truck_id", "NK-006")
+                        .add("subjob_no", "ND-170517-0050")
+                        .add("invoiceNo", invoiceNoString).build();
+                Request.Builder builder = new Request.Builder();
+                Request request = builder.post(requestBody).url(urlSaveQuantityReturnAll).build();
+                Response response = okHttpClient.newCall(request).execute();
+                return response.body().string();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Log.d("Tag", "onPostExecute:->return save return all product:::::  " + s);
+        }
     }
 
 
@@ -329,6 +402,19 @@ public class ReturnActivity extends AppCompatActivity {
         TextView descriptTextView;
 
         AlertMessageViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+    static class ConfirmReturnAllViewHolder {
+        @BindView(R.id.imgCAAlert)
+        ImageView imgRtnAImageView;
+        @BindView(R.id.txtCAHeader)
+        TextView headerRtnTextView;
+        @BindView(R.id.txtCADescript)
+        TextView descriptRtnTextView;
+
+        ConfirmReturnAllViewHolder(View view) {
             ButterKnife.bind(this, view);
         }
     }

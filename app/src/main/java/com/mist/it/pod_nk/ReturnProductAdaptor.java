@@ -19,7 +19,7 @@ import butterknife.ButterKnife;
 public class ReturnProductAdaptor extends BaseAdapter {
     //Explicit
     private Context context;
-    private String[] modelStrings, detailStrings, amountStrings, returnQtyStrings;
+    private String[] modelStrings, detailStrings, amountStrings, returnQtyStrings, invoiceSeqStrings;
     ReturnListViewHolder productListViewHolder;
     private ArrayList<ReturnItem> returnItems;
 
@@ -28,6 +28,13 @@ public class ReturnProductAdaptor extends BaseAdapter {
         this.returnItems = returnItems;
     }
 
+    public String[] getInvoiceSeqStrings() {
+        return invoiceSeqStrings;
+    }
+
+    public void setInvoiceSeqStrings(String[] invoiceSeqStrings) {
+        this.invoiceSeqStrings = invoiceSeqStrings;
+    }
 
     @Override
     public int getCount() {

@@ -2,8 +2,16 @@ package com.mist.it.pod_nk;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.location.Criteria;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,10 +29,13 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.internal.Internal;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -58,6 +69,14 @@ public class ReturnActivity extends AppCompatActivity {
     private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings, loginStrings;
     private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings;
     private ArrayList<ReturnItem> returnItems = new ArrayList<ReturnItem>();
+
+    private Uri firstUri, secondUri;
+    private boolean firstImgFlagABoolean,secondImgFlagABoolean, saveImgABoolean;
+    private String pathFirstImgString, pathSecondImgString;
+    private Criteria criteria;
+    private Bitmap firstImgBitmap = null;
+    private Bitmap secondImgBitmap = null;
+
     DialogViewHolder dialogViewHolder;
     AlertMessageViewHolder alertMessageViewHolder;
     ConfirmReturnAllViewHolder confirmReturnAllViewHolder;
@@ -70,6 +89,18 @@ public class ReturnActivity extends AppCompatActivity {
         //1. Bind Widget
         ButterKnife.bind(this);
 
+        //Set flag img
+        firstImgFlagABoolean = false;
+        secondImgFlagABoolean = false;
+        saveImgABoolean = false;
+
+
+
+        // click image
+//        firstImageView.setOnClickListener( ReturnActivity.this);
+//        secondImageView.setOnClickListener((View.OnClickListener) ReturnActivity.this);
+
+
         // 2.create class for synDataAdaptor to listview
         SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, "", "", returnItems);
         synJobDtlProduct.execute(urlGetJobDetailProduct);
@@ -79,7 +110,7 @@ public class ReturnActivity extends AppCompatActivity {
 
 
     //Set On Click Listener
-    @OnClick({R.id.btnRASave, R.id.btnRAReturnAll, R.id.btnRAConfirm})
+    @OnClick({R.id.btnRASave, R.id.btnRAReturnAll, R.id.btnRAConfirm,R.id.imgRAOne,R.id.imgRATwo})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btnRASave:
@@ -101,8 +132,23 @@ public class ReturnActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 SyncReturnAll syncReturnAll = new SyncReturnAll(ReturnActivity.this, invoiceNoStrings[0]);
                                 syncReturnAll.execute(urlSaveQuantityReturnAll);
+                               // if() {
+                                    for (int i = 0; i < returnItems.size(); i++) {
+
+                                        ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
+                                        //returnItems.get(i).setRetrunAmountString();
+                                        itemListView.setAdapter(returnProductAdaptor);
+                                    }
+                               // }
                             }
                         });
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener(){
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
                 builder.setView(view1);
                 builder.show();
 
@@ -110,6 +156,28 @@ public class ReturnActivity extends AppCompatActivity {
 //
                 break;
             case R.id.btnRAConfirm:
+                break;
+
+            case R.id.imgRAOne:
+                if(!firstImgFlagABoolean){
+                    File originalFile1 = new File(Environment.getExternalStorageDirectory() + "/DCIM/", "inv_first.png");
+
+                    Intent cameraIntent1 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    firstUri = Uri.fromFile(originalFile1);
+                    cameraIntent1.putExtra(MediaStore.EXTRA_OUTPUT, firstUri);
+                    startActivityForResult(cameraIntent1, 1);
+                }
+                break;
+
+            case R.id.imgRATwo:
+                if (!secondImgFlagABoolean) {
+                    File orignalFile2 = new File(Environment.getExternalStorageDirectory()  + "/DCIM/", "inv_second.png");
+
+                    Intent cameraIntent2 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    secondUri = Uri.fromFile(orignalFile2);
+                    cameraIntent2.putExtra(MediaStore.EXTRA_OUTPUT, secondUri);
+                    startActivityForResult(cameraIntent2,2);
+                }
                 break;
         }
     }
@@ -354,11 +422,15 @@ public class ReturnActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             try {
+                GPSManager gpsManager = new GPSManager(ReturnActivity.this);
+
                 OkHttpClient okHttpClient = new OkHttpClient();
                 RequestBody requestBody = new FormEncodingBuilder()
                         .add("isAdd", "true")
                         .add("truck_id", "NK-006")
-                        .add("subjob_no", "ND-170517-0050")
+                        .add("subjob_no", "ND-170608-0013")
+                        .add("user_name", "70-4997")
+                        .add("gps_timeStamp", gpsManager.getDateTime())
                         .add("invoiceNo", invoiceNoString).build();
                 Request.Builder builder = new Request.Builder();
                 Request request = builder.post(requestBody).url(urlSaveQuantityReturnAll).build();
@@ -374,9 +446,53 @@ public class ReturnActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Log.d("Tag", "onPostExecute:->return save return all product:::::  " + s);
+
         }
     }
 
+    //////// onResult of image /////////////
+
+
+
+     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+         switch (requestCode) {
+             case 1: // From take  photo
+                 if (resultCode == RESULT_OK) {
+                   pathFirstImgString = firstUri.getPath().toString();
+
+                     try {
+                         firstImgBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(firstUri));
+                         if (firstImgBitmap.getHeight() < firstImgBitmap.getWidth()) {
+                             firstImgBitmap = rotateBitmap(firstImgBitmap);
+                         }
+                         firstImageView.setImageBitmap(firstImgBitmap);
+                     } catch (FileNotFoundException e) {
+                         e.printStackTrace();
+                     }
+                 }
+            break;
+            case 2:
+                if (resultCode == RESULT_OK) {
+                    pathSecondImgString = secondUri.getPath().toString();
+
+                    try {
+                        secondImgBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(secondUri));
+                        if (secondImgBitmap.getHeight() < secondImgBitmap.getWidth()) {
+                            secondImgBitmap = rotateBitmap(secondImgBitmap);
+                        }
+                        secondImageView.setImageBitmap(secondImgBitmap);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            break;
+
+         }
+    }
 
     static class DialogViewHolder {
         //        @Nullable
@@ -417,6 +533,16 @@ public class ReturnActivity extends AppCompatActivity {
         ConfirmReturnAllViewHolder(View view) {
             ButterKnife.bind(this, view);
         }
+    }
+
+    private Bitmap rotateBitmap(Bitmap src) {
+
+        // create new matrix
+        Matrix matrix = new Matrix();
+        // setup rotation degree
+        matrix.postRotate(90);
+        Bitmap bmp = Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
+        return bmp;
     }
 }
 

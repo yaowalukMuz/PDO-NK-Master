@@ -1,5 +1,6 @@
 package com.mist.it.pod_nk;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +39,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -45,8 +49,10 @@ import butterknife.OnClick;
 import butterknife.OnItemClick;
 
 import static com.mist.it.pod_nk.MyConstant.urlGetJobDetailProduct;
+import static com.mist.it.pod_nk.MyConstant.urlSaveImagePerInvoice;
 import static com.mist.it.pod_nk.MyConstant.urlSaveQuantityReturnAll;
 import static com.mist.it.pod_nk.MyConstant.urlSaveQuantityReturnByItem;
+import static com.mist.it.pod_nk.MyConstant.urlUploadPicture;
 
 public class ReturnActivity extends AppCompatActivity {
 
@@ -114,6 +120,31 @@ public class ReturnActivity extends AppCompatActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btnRASave:
+                if (pathFirstImgString != null) {
+                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, firstImgBitmap,invoiceNoStrings[0].toString(),"","inv_first.png");
+                    synUploadImage.execute();
+                    if (saveImgABoolean) {
+
+                    } else {
+                        firstImgFlagABoolean = true;
+                        pathFirstImgString = null;
+                        saveImgABoolean = false;
+                       // checkPictureBeforeConfirm();
+                    }
+                } else if (pathSecondImgString != null) {
+                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, secondImgBitmap,invoiceNoStrings[0].toString(),"","inv_second.png");
+                    synUploadImage.execute();
+                    if (saveImgABoolean) {
+
+                    } else {
+                        saveImgABoolean = false;
+                        pathSecondImgString = null;
+                        firstImgFlagABoolean = true;
+//                        checkPictureBeforeConfirm();
+                    }
+                }
+
+
                 break;
             case R.id.btnRAReturnAll:
 
@@ -156,6 +187,7 @@ public class ReturnActivity extends AppCompatActivity {
 //
                 break;
             case R.id.btnRAConfirm:
+                finish();
                 break;
 
             case R.id.imgRAOne:
@@ -532,6 +564,85 @@ public class ReturnActivity extends AppCompatActivity {
 
         ConfirmReturnAllViewHolder(View view) {
             ButterKnife.bind(this, view);
+        }
+    }
+
+    private class SynUploadImage extends AsyncTask<Void, Void, String> {
+        private Context context;
+        private Bitmap bitmap;
+        private String invoiceNoString,subjobNoString,mFileNameString;
+        private UploadImageUtils uploadImageUtils;
+
+        ProgressDialog progressDialog;
+        Runnable progressRunnable;
+        Handler pdCancller;
+
+        public SynUploadImage(Context context, Bitmap bitmap, String invoiceNoString, String subjobNoString, String mFileNameString) {
+            this.context = context;
+            this.bitmap = bitmap;
+            this.invoiceNoString = invoiceNoString;
+            this.subjobNoString = subjobNoString;
+            this.mFileNameString = mFileNameString;
+        }
+
+
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            progressDialog = new ProgressDialog(context);
+//            progressDialog.setMessage(getResources().getString(R.string.loading));
+//            progressDialog.setCancelable(false);
+//            progressDialog.show();
+//
+//            progressRunnable = new Runnable() {
+//                @Override
+//                public void run() {
+//                    progressDialog.cancel();
+//                }
+//            };
+//        }
+
+
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            uploadImageUtils = new UploadImageUtils();
+            final String result = uploadImageUtils.uploadFile(mFileNameString,urlUploadPicture,bitmap,"0","I");
+            if(result=="NOK"){
+                return "NOK";
+
+            }else{
+                try {
+                    GPSManager gpsManager = new GPSManager(ReturnActivity.this);
+                    OkHttpClient okHttpClient = new OkHttpClient();
+                    RequestBody requestBody = new FormEncodingBuilder()
+                            .add("isAdd", "true")
+                            .add("subjob_no", "ND-170608-0013")
+                            .add("invoiceNo", invoiceNoString)
+                            .add("File_Name", result)
+                            .add("user_name", "70-4997")
+                            .add("gps_timeStamp", gpsManager.getDateTime())
+                            .build();
+                    Request.Builder builder = new Request.Builder();
+                    Request request = builder.post(requestBody).url(urlSaveImagePerInvoice).build();
+                    Response response = okHttpClient.newCall(request).execute();
+
+                    return response.body().string();
+                } catch (IOException e) {
+                    Log.d("Tag", String.valueOf(e) + " Line: " + e.getStackTrace()[0].getLineNumber());
+                    e.printStackTrace();
+                    return null;
+                }
+
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Log.d("Tag", "___________________" + s);
         }
     }
 

@@ -32,7 +32,7 @@ public class UploadImageUtils {
             String twoHyphens = "--";
             String boundary = "*****";
 
-            URL url = new URL(urlServer + "?plan=" + plan_id + "&op=" + option + "&");
+            URL url = new URL(urlServer + "?store_id=" + plan_id + "&op=" + option + "&");
 
             Log.d("Tag URL", "URL ===> " + url);
             connection = (HttpURLConnection) url.openConnection();

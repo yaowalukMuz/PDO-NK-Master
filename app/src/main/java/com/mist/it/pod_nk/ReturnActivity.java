@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -102,11 +103,11 @@ public class ReturnActivity extends AppCompatActivity {
 
 
 
-        // click image
-//        firstImageView.setOnClickListener( ReturnActivity.this);
-//        secondImageView.setOnClickListener((View.OnClickListener) ReturnActivity.this);
-
-
+        // set image
+        //firstImageView.setImageBitmap();
+        Glide.with(this).load(Environment.getExternalStorageDirectory() + "/DCIM/inv_first.png").into(firstImageView);
+        Glide.with(this).load(Environment.getExternalStorageDirectory() + "/DCIM/inv_second.png").into(secondImageView);
+//
         // 2.create class for synDataAdaptor to listview
         SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, "", "", returnItems);
         synJobDtlProduct.execute(urlGetJobDetailProduct);
@@ -643,6 +644,21 @@ public class ReturnActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Log.d("Tag", "___________________" + s);
+            if (s.equals("OK")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context,getResources().getText(R.string.save_img_success),Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }else{
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context,getResources().getText(R.string.save_img_unsuccessful),Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 

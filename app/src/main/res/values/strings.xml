@@ -47,4 +47,6 @@
     <string name="Desc">Description</string>
     <string name="retrunBtn">Confirm</string>
     <string name="loading">Loading</string>
+    <string name="save_img_success">Save Img Success</string>
+    <string name="save_img_unsuccessful">Save Img Unsuccessful</string>
 </resources>

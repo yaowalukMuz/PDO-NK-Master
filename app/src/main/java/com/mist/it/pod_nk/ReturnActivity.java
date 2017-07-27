@@ -166,11 +166,11 @@ public class ReturnActivity extends AppCompatActivity {
                                 syncReturnAll.execute(urlSaveQuantityReturnAll);
                                // if() {
                                     for (int i = 0; i < returnItems.size(); i++) {
-
-                                        ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
-                                        //returnItems.get(i).setRetrunAmountString();
-                                        itemListView.setAdapter(returnProductAdaptor);
+                                        returnItems.get(i).setRetrunAmountString(returnItems.get(i).getAmountString());
                                     }
+                                ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
+
+                                itemListView.setAdapter(returnProductAdaptor);
                                // }
                             }
                         });

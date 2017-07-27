@@ -49,4 +49,6 @@
     <string name="loading">Loading</string>
     <string name="save_img_success">Save Img Success</string>
     <string name="save_img_unsuccessful">Save Img Unsuccessful</string>
+    <string name="ODOHint">Please add ODO Meter</string>
+    <string name="Invoice">Invoice</string>
 </resources>

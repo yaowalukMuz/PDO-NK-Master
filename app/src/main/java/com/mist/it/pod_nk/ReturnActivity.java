@@ -49,6 +49,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
+import static com.mist.it.pod_nk.MyConstant.projectString;
+import static com.mist.it.pod_nk.MyConstant.serverString;
 import static com.mist.it.pod_nk.MyConstant.urlGetJobDetailProduct;
 import static com.mist.it.pod_nk.MyConstant.urlSaveImagePerInvoice;
 import static com.mist.it.pod_nk.MyConstant.urlSaveQuantityReturnAll;
@@ -73,13 +75,13 @@ public class ReturnActivity extends AppCompatActivity {
     ListView itemListView;
 
 
-    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings, loginStrings;
-    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings;
+    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings,loginStrings;
+    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings ,imgFileStrings;
     private ArrayList<ReturnItem> returnItems = new ArrayList<ReturnItem>();
 
     private Uri firstUri, secondUri;
     private boolean firstImgFlagABoolean,secondImgFlagABoolean, saveImgABoolean;
-    private String pathFirstImgString, pathSecondImgString;
+    private String pathFirstImgString, pathSecondImgString, imgFirstPathString, imgSecondPathString;
     private Criteria criteria;
     private Bitmap firstImgBitmap = null;
     private Bitmap secondImgBitmap = null;
@@ -103,11 +105,7 @@ public class ReturnActivity extends AppCompatActivity {
 
 
 
-        // set image
-        //firstImageView.setImageBitmap();
-        Glide.with(this).load(Environment.getExternalStorageDirectory() + "/DCIM/inv_first.png").into(firstImageView);
-        Glide.with(this).load(Environment.getExternalStorageDirectory() + "/DCIM/inv_second.png").into(secondImageView);
-//
+
         // 2.create class for synDataAdaptor to listview
         SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, "", "", returnItems);
         synJobDtlProduct.execute(urlGetJobDetailProduct);
@@ -309,11 +307,7 @@ public class ReturnActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            Log.d("Tag", "onPostExecute: " + s);
-
-            // returnItmes = new ArrayList<ReturnItem>();
-            //List<Map<String ,Objects>> retrunProductItem = new ArrayList<Map<String,Objects>>();
-            // Map<String, Objects> map = new Hashtable<String, Objects>();
+           // Log.d("Tag", "onPostExecute: " + s);
 
             try {
                 JSONObject jsonObject = new JSONObject(s);
@@ -328,12 +322,15 @@ public class ReturnActivity extends AppCompatActivity {
                 detailStrings = new String[jsonArray.length()][];
                 returnAmountStrings = new String[jsonArray.length()][];
                 invoiceNoSeqStrings = new String[jsonArray.length()][];
+                imgFileStrings = new String[jsonArray.length()][];
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                     invoiceNoStrings[i] = jsonObject1.getString("Invoice");
                     subJobStrings[i] = jsonObject1.getString("SubJobNo");
-                    imgFileNameStrings[i] = jsonObject1.getString("ImgPath");
+                    //imgFileNameStrings[i] = jsonObject1.getString("ImgPath");
+
+                    //imgFileStrings[i] = jsonObject1.getString("InvoiceImg");
 
                     JSONArray productArray = jsonObject1.getJSONArray("Product");
 
@@ -360,12 +357,20 @@ public class ReturnActivity extends AppCompatActivity {
                         returnItem.setInvoiceSeqString(jsonObject2.getString("InvoiceSeqn"));
                         returnItem.setInvoiceNoString(invoiceNoStrings[0]);
                         returnItmes.add(returnItem);
-                        Log.d("Tag", "returnItem: " + returnItmes);
-
-
                     }
 
+                    JSONArray invoiceImgArray = jsonObject1.getJSONArray("InvoiceImg");
+                    imgFileStrings[i] = new String[invoiceImgArray.length()];
 
+
+                  // for(int k = 0;k < invoiceImgArray.length();k++) {
+                        JSONObject jsonObject3 = invoiceImgArray.getJSONObject(0);
+                        JSONObject jsonObject4 = invoiceImgArray.getJSONObject(1);
+                           imgFirstPathString = jsonObject3.getString("ImgPath");
+                            imgSecondPathString =jsonObject4.getString("ImgPath");
+                   // }
+
+                    Log.d("Tag", "imgFirstPathString: " + imgFirstPathString);
                 }
 
                 //set adapter Listview
@@ -374,7 +379,13 @@ public class ReturnActivity extends AppCompatActivity {
                 ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(context, returnItmes);
 
                 itemListView.setAdapter(returnProductAdaptor);
+                // set image
+                //firstImageView.setImageBitmap();
+                Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + imgFirstPathString);
 
+                Glide.with(ReturnActivity.this).load(serverString + projectString +"/app/CenterService/" + imgFirstPathString ).into(firstImageView);
+                Glide.with(ReturnActivity.this).load(serverString + projectString +"/app/CenterService/" + imgSecondPathString ).into(secondImageView);
+//
 
             } catch (Exception e) {
                 Log.d("Tag", "onPostExecute: " + e + " Line: " + e.getStackTrace()[0].getLineNumber());

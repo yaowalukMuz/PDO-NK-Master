@@ -24,6 +24,7 @@
     <color name="MediumSlateBlue">#7B68EE</color>
     <color name="Maroon">#800000</color>
     <color name="Olive">#808000</color>
+    <color name="DarkSeaGreenLight">#cfe2cf</color>
     <color name="DarkSeaGreen">#8FBC8F</color>
     <color name="DarkViolet">#9400D3</color>
     <color name="LightBlue">#ADD8E6</color>
@@ -62,7 +63,7 @@
     <color name="Gold">#FFD700</color>
     <color name="PeachPuff">#FFDAB9</color>
     <color name="Bisque">#ffe4c4</color>
-    <color name="MistyRose">#FFE4E1</color>
+    <color name="MistyRose">#ffe4e1</color>
     <color name="BlanchedAlmond">#FFEBCD</color>
     <color name="Cornsilk">#FFF8DC</color>
     <color name="FloralWhite">#FFFAF0</color>
@@ -73,6 +74,4 @@
     <color name="Bisque2">#78ffe4c4</color>
     <color name="GhostWhite2">#78f8f8ff</color>
     <color name="Cornsilk2">#78fff8dc</color>
-
-
 </resources>

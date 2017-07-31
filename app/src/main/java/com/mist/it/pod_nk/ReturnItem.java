@@ -6,7 +6,7 @@ package com.mist.it.pod_nk;
 
 public class ReturnItem {
 
-    private String invoiceSeqString,invoiceNoString, modelString,descriptionString,amountString,retrunAmountString;
+    private String invoiceSeqString,invoiceNoString, modelString,descriptionString,amountString,retrunAmountString,imgFileString;
 
     public ReturnItem() {
         invoiceSeqString = "";
@@ -15,15 +15,17 @@ public class ReturnItem {
         descriptionString = "";
         amountString = "";
         retrunAmountString = "";
+        imgFileString = "";
     }
 
-    public ReturnItem(String invoiceSeqString, String invoiceNoString, String modelString, String descriptionString, String amountString, String retrunAmountString) {
+    public ReturnItem(String invoiceSeqString, String invoiceNoString, String modelString, String descriptionString, String amountString, String retrunAmountString, String imgFileString) {
         this.invoiceSeqString = invoiceSeqString;
         this.invoiceNoString = invoiceNoString;
         this.modelString = modelString;
         this.descriptionString = descriptionString;
         this.amountString = amountString;
         this.retrunAmountString = retrunAmountString;
+        this.imgFileString = imgFileString;
     }
 
     public String getAmountString() {
@@ -72,5 +74,13 @@ public class ReturnItem {
 
     public void setRetrunAmountString(String retrunAmountString) {
         this.retrunAmountString = retrunAmountString;
+    }
+
+    public String getImgFileString() {
+        return imgFileString;
+    }
+
+    public void setImgFileString(String imgFileString) {
+        this.imgFileString = imgFileString;
     }
 }

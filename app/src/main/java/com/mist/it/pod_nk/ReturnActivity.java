@@ -385,7 +385,7 @@ public class ReturnActivity extends AppCompatActivity {
                 itemListView.setAdapter(returnProductAdaptor);
                 // set image
                 //firstImageView.setImageBitmap();
-                Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + imgFirstPathString);
+              //  Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + imgFirstPathString);
 
                 if ((!imgFirstPathString.equals("null")) && (imgFirstPathString.contains("inv_first"))) {
                     Glide.with(ReturnActivity.this).load(serverString + projectString + "/app/CenterService/" + imgFirstPathString).into(firstImageView);
@@ -587,7 +587,7 @@ public class ReturnActivity extends AppCompatActivity {
         }
     }
 
-    private class SynUploadImage extends AsyncTask<Void, Void, String> {
+    private  class SynUploadImage extends AsyncTask<Void, Void, String> {
         private Context context;
         private Bitmap bitmap;
         private String invoiceNoString, subjobNoString, mFileNameString;
@@ -611,7 +611,7 @@ public class ReturnActivity extends AppCompatActivity {
         protected String doInBackground(Void... params) {
 
             uploadImageUtils = new UploadImageUtils();
-            final String result = uploadImageUtils.uploadFile(mFileNameString, urlUploadPicture, bitmap, "0", "I",subjobNoString, invoiceNoString);
+            final String result = uploadImageUtils.uploadFile(mFileNameString, urlUploadPicture, bitmap, storeIdString, "I",subjobNoString, invoiceNoString);
             if (result == "NOK") {
                 return "NOK";
 

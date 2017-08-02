@@ -1,5 +1,6 @@
 package com.mist.it.pod_nk;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,13 +10,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -41,10 +42,10 @@ import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemClick;
 
 import static com.mist.it.pod_nk.MyConstant.projectString;
 import static com.mist.it.pod_nk.MyConstant.serverString;
+import static com.mist.it.pod_nk.MyConstant.urlSaveImagePerInvoice;
 import static com.mist.it.pod_nk.MyConstant.urlSaveImagePerStore;
 import static com.mist.it.pod_nk.MyConstant.urlUploadPicture;
 
@@ -75,14 +76,15 @@ public class DetailJobActivity extends AppCompatActivity {
     @BindView(R.id.btnDJAConfirm)
     Button confirmButton;
 
-    String dateString, subJobNoString, tripNoString, storeString, storeIdString, arriveTimeString, pathImgFirstString, pathImgSecondString, pathImgThirdString, pathImgFourthString;
+    String dateString, subJobNoString, tripNoString, storeString, storeIdString, arriveTimeString, pathImgFirstString, pathImgSecondString, pathImgThirdString, pathImgFourthString, pathImgInviceFirstString;
     String[] loginStrings, invoiceStrings;
-    private Uri firstUri, secondUri, thirdUri, fourthUri;
-    private Boolean imgFirstFlagABoolean, imgSecondFlagABoolean, imgThirdFlagABoolean, imgFourthFlagABoolean, flagSaveABoolean;
+    private Uri firstUri, secondUri, thirdUri, fourthUri, invFirstUri;
+    private Boolean imgFirstFlagABoolean, imgSecondFlagABoolean, imgThirdFlagABoolean, imgFourthFlagABoolean, imgInvoiceFirstABoolean, flagSaveABoolean;
     private Bitmap imgFirstBitmap = null;
     private Bitmap imgSecondBitmap = null;
     private Bitmap imgThirdBitmap = null;
     private Bitmap imgFourthBitmap = null;
+    private Bitmap imgInvoiceFirstBitmap = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,7 @@ public class DetailJobActivity extends AppCompatActivity {
         loginStrings = getIntent().getStringArrayExtra("Login");
         subJobNoString = getIntent().getStringExtra("SubJobNo");
         storeString = getIntent().getStringExtra("Place");
+       // storeIdString = getIntent().getStringExtra("StoreId");
 
         storeTextView.setText(getResources().getText(R.string.Store) + ": " + storeString);
         dateTextView.setText(getResources().getText(R.string.Date) + ": " + dateString);
@@ -112,19 +115,19 @@ public class DetailJobActivity extends AppCompatActivity {
 
     }
 
-    @OnItemClick(R.id.lisDJAInvoiceList)
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(DetailJobActivity.this, ReturnActivity.class);
-        intent.putExtra("Date", dateString);
-        intent.putExtra("Position", tripNoString);
-        intent.putExtra("Login", loginStrings);
-        intent.putExtra("SubJobNo", subJobNoString);
-        intent.putExtra("Place", storeString);
-        intent.putExtra("StoreId", storeIdString);
-        intent.putExtra("Invoice", invoiceStrings[position]);
-        startActivity(intent);
-
-    }
+//    @OnItemClick(R.id.lisDJAInvoiceList)
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        Intent intent = new Intent(DetailJobActivity.this, ReturnActivity.class);
+//        intent.putExtra("Date", dateString);
+//        intent.putExtra("Position", tripNoString);
+//        intent.putExtra("Login", loginStrings);
+//        intent.putExtra("SubJobNo", subJobNoString);
+//        intent.putExtra("Place", storeString);
+//        intent.putExtra("StoreId", storeIdString);
+//        intent.putExtra("Invoice", invoiceStrings[position]);
+//        startActivity(intent);
+//
+//    }
 
     class SynGetJobDetail extends AsyncTask<Void, Void, String> {
         public SynGetJobDetail() {
@@ -187,7 +190,7 @@ public class DetailJobActivity extends AppCompatActivity {
                 invoiceListView.setAdapter(invoiceListAdaptor);
 
 
-                Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + pathImgFirstString);
+            //    Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + pathImgFirstString);
 
             Glide.with(DetailJobActivity.this).load(serverString + projectString + "/app/CenterService/" + pathImgFirstString).into(firstImageView);
             Glide.with(DetailJobActivity.this).load(serverString + projectString + "/app/CenterService/" + pathImgSecondString).into(secondImageView);
@@ -229,7 +232,7 @@ public class DetailJobActivity extends AppCompatActivity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(context).inflate(R.layout.invoice_listview, null);
                 invoiceListViewHolder = new InvoiceListViewHolder(convertView);
@@ -240,6 +243,34 @@ public class DetailJobActivity extends AppCompatActivity {
             Log.d("Tag", invoiceStrings[position]);
 
             invoiceListViewHolder.invoiceTextView.setText(invoiceStrings[position]);
+
+            invoiceListViewHolder.invoiceTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent intent = new Intent(DetailJobActivity.this, ReturnActivity.class);
+                    intent.putExtra("Date", dateString);
+                    intent.putExtra("Position", tripNoString);
+                    intent.putExtra("Login", loginStrings);
+                    intent.putExtra("SubJobNo", subJobNoString);
+                    intent.putExtra("Place", storeString);
+                    intent.putExtra("StoreId", storeIdString);
+                    intent.putExtra("Invoice", invoiceStrings[position]);
+                    startActivity(intent);
+                }
+            });
+
+            invoiceListViewHolder.cameraImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    File originalFile1 = new File(Environment.getExternalStorageDirectory() + "/DCIM/", "inv_first.png");
+                    Intent cameraIntent5 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    invFirstUri = Uri.fromFile(originalFile1);
+                    cameraIntent5.putExtra(MediaStore.EXTRA_OUTPUT, invFirstUri);
+                    startActivityForResult(cameraIntent5, 5);
+
+                }
+            });
 
             return convertView;
         }
@@ -358,7 +389,6 @@ public class DetailJobActivity extends AppCompatActivity {
                     cameraIntent1.putExtra(MediaStore.EXTRA_OUTPUT, firstUri);
                     startActivityForResult(cameraIntent1, 1);
 
-
                 }
                 break;
             case R.id.imgDJATwo:
@@ -462,6 +492,23 @@ public class DetailJobActivity extends AppCompatActivity {
                 }
 
                 break;
+            case 5:
+                if (resultCode == RESULT_OK) {
+                    //pathImgInviceFirstString = invFirstUri.getPath().toString();
+                    try {
+                        imgInvoiceFirstBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(invFirstUri));
+                        Log.d("Tag", "Before Call  ==> " + imgInvoiceFirstBitmap + " , " + invoiceStrings[0].toString() + " , " + subJobNoString );
+
+
+                        SynUploadImagePerInv synUploadImage = new SynUploadImagePerInv(DetailJobActivity.this, imgInvoiceFirstBitmap, invoiceStrings[0].toString(), subJobNoString, "inv_first.png");
+                        synUploadImage.execute();
+
+
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                }
         }
     }
 
@@ -520,7 +567,7 @@ public class DetailJobActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            Log.d("Tag", "___________________" + s);
+            Log.d("Tag", "____ Save image / store _______________" + s);
             if (s.equals("OK")) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -539,7 +586,79 @@ public class DetailJobActivity extends AppCompatActivity {
         }
     }
 
+    private  class SynUploadImagePerInv extends AsyncTask<Void, Void, String> {
+        private Context context;
+        private Bitmap bitmap;
+        private String invoiceNoString, subjobNoString, mFileNameString;
+        private UploadImageUtils uploadImageUtils;
 
+
+        public SynUploadImagePerInv(Context context, Bitmap bitmap, String invoiceNoString, String subjobNoString, String mFileNameString) {
+            this.context = context;
+            this.bitmap = bitmap;
+            this.invoiceNoString = invoiceNoString;
+            this.subjobNoString = subjobNoString;
+            this.mFileNameString = mFileNameString;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            uploadImageUtils = new UploadImageUtils();
+            final String result = uploadImageUtils.uploadFile(mFileNameString, urlUploadPicture, bitmap, storeIdString, "I",subjobNoString, invoiceNoString);
+            if (result == "NOK") {
+                return "NOK";
+
+            } else {
+                try {
+                    GPSManager gpsManager = new GPSManager(DetailJobActivity.this);
+
+                    Log.d("Tag", "send ==> " + subjobNoString + " , " + invoiceNoString + " , " + result + " , " + loginStrings[0] + " , " + gpsManager.getDateTime());
+                    OkHttpClient okHttpClient = new OkHttpClient();
+                    RequestBody requestBody = new FormEncodingBuilder()
+                            .add("isAdd", "true")
+                            .add("subjob_no", subJobNoString)
+                            .add("invoiceNo", invoiceNoString)
+                            .add("File_Name", result)
+                            .add("user_name", loginStrings[5])
+                            .add("gps_timeStamp", gpsManager.getDateTime())
+                            .build();
+                    Request.Builder builder = new Request.Builder();
+                    Request request = builder.post(requestBody).url(urlSaveImagePerInvoice).build();
+                    Response response = okHttpClient.newCall(request).execute();
+
+                    return response.body().string();
+                } catch (IOException e) {
+                    Log.d("Tag", String.valueOf(e) + " Line: " + e.getStackTrace()[0].getLineNumber());
+                    e.printStackTrace();
+                    return null;
+                }
+
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Log.d("Tag", "________Save image / invoice___________" + s);
+            if (s.equals("OK")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, getResources().getText(R.string.save_img_success), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, getResources().getText(R.string.save_img_unsuccessful), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        }
+    }
     private Bitmap rotateBitmap(Bitmap src) {
 
         // create new matrix

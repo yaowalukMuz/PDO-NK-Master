@@ -11,12 +11,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by Yaowaluk on 27/07/2560.
- */
-
 public class InJobNoAdaptor extends BaseAdapter {
-
     Context context;
     String[] invoiceStrings, amountStrings;
     InJobNoViewHolder inJobNoViewHolder;

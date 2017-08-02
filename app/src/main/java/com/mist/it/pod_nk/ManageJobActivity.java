@@ -1,9 +1,9 @@
 package com.mist.it.pod_nk;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -63,7 +63,7 @@ public class ManageJobActivity extends AppCompatActivity {
 
         dateString = getIntent().getStringExtra("Date");
         tripNoString = getIntent().getStringExtra("Position");
-        loginStrings = getIntent().getStringArrayExtra("Login ");
+        loginStrings = getIntent().getStringArrayExtra("Login");
         subJobNoString = getIntent().getStringExtra("SubJobNo");
 
         jobNoTextView.setText("Trip " + tripNoString);
@@ -71,6 +71,7 @@ public class ManageJobActivity extends AppCompatActivity {
 
         SyncGetJob syncGetJob = new SyncGetJob();
         syncGetJob.execute();
+
     }
 
     private class SyncGetJob extends AsyncTask<Void, Void, String> {
@@ -183,6 +184,7 @@ public class ManageJobActivity extends AppCompatActivity {
                 startTimeTextView.setText(tripStartTimeStrings[0]);
                 stopMilesTextView.setText(tripStopMileStrings[0]);
                 stopTimeTextView.setText(tripStopTimeStrings[0]);
+
 
             } catch (JSONException e) {
                 e.printStackTrace();

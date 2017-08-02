@@ -14,8 +14,9 @@ import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
 /**
- * Created by Yaowaluk on 25/07/2560.
+ * Created by Tunyaporn on 7/24/2017.
  */
 
 public class GPSManager {
@@ -34,7 +35,7 @@ public class GPSManager {
         if (locationManager.isProviderEnabled(strProvider)) {
 
 
-            if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return null;
             }
             locationManager.requestLocationUpdates(strProvider, 1000, 10, locationListener);
@@ -104,6 +105,7 @@ public class GPSManager {
             if (strLat.equals("Unknown") && strLng.equals("Unknown") && rev < 10) {
 
                 rev++;
+                setLatLong(rev);
                 Log.d("ServiceTag", "Repeat");
             } else if (strLat.equals("Unknown") && strLng.equals("Unknown") && rev >= 10) {
                 //Can't get lat/long

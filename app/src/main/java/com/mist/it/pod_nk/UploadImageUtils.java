@@ -12,11 +12,11 @@ import java.net.URL;
 import java.util.Random;
 
 /**
- * Created by Yaowaluk on 26/07/2560.
+ * Created by Tunyaporn on 7/26/2017.
  */
 
 public class UploadImageUtils {
-    public static String uploadFile(String fileNameInServer, String urlServer, Bitmap bitmap, String plan_id, String option) {
+    public static String uploadFile(String fileNameInServer, String urlServer, Bitmap bitmap, String store_id, String option, String jobNo, String invoiceNo) {
         try {
 
             // configurable parameters
@@ -32,7 +32,7 @@ public class UploadImageUtils {
             String twoHyphens = "--";
             String boundary = "*****";
 
-            URL url = new URL(urlServer + "?store_id=" + plan_id + "&op=" + option + "&");
+            URL url = new URL(urlServer + "?store_id=" + store_id + "&jobNo=" + jobNo + "&invoiceNo=" + invoiceNo + "&op=" + option + "&");
 
             Log.d("Tag URL", "URL ===> " + url);
             connection = (HttpURLConnection) url.openConnection();
@@ -61,9 +61,20 @@ public class UploadImageUtils {
 
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap = Bitmap.createScaledBitmap(bitmap, 500, 666, false);
+            if (bitmap.getWidth() > bitmap.getHeight()) {
+                bitmap = Bitmap.createScaledBitmap(bitmap, 1600, 1200, false);
+            } else {
+                bitmap = Bitmap.createScaledBitmap(bitmap, 1200, 1600, false);
+
+            }
             bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
             byte[] data = baos.toByteArray();
+
+            data[13] = 00000001;
+            data[14] = 00000001;
+            data[15] = (byte) 244;
+            data[16] =  00000001;
+            data[17] = (byte) 244;
 
             Log.d("Bitmap", "Bitmap ==> " + bitmap);
 

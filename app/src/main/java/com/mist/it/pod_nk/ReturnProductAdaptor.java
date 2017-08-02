@@ -13,7 +13,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by Yaowaluk on 18/07/2560.
+ * Created by Tunyaporn on 7/31/2017.
  */
 
 public class ReturnProductAdaptor extends BaseAdapter {
@@ -63,7 +63,7 @@ public class ReturnProductAdaptor extends BaseAdapter {
         }
 
 
-       String text = convertView.getResources().getString(R.string.Model) + " : " + returnItems.get(position).getModelString();
+        String text = convertView.getResources().getString(R.string.Model) + " : " + returnItems.get(position).getModelString();
         productListViewHolder.modelTextView.setText(text);
         text = convertView.getResources().getString(R.string.Desc) + " : " + returnItems.get(position).getDescriptionString();
         productListViewHolder.detailTextView.setText(text);

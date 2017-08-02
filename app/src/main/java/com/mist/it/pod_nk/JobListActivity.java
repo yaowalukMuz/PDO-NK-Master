@@ -183,8 +183,9 @@ public class JobListActivity extends AppCompatActivity {
                 fullNameTextView.setText(driverNameString);
                 dateButton.setText(deliveryDateString);
 
-                JobListAdaptor jobListAdaptor = new JobListAdaptor(numberStrings, detailListStrings, arriveTimeStrings, context);
+                JobListAdaptor jobListAdaptor = new JobListAdaptor(numberStrings, detailListStrings, arriveTimeStrings, subJobNoStrings, context);
                 tripListView.setAdapter(jobListAdaptor);
+                
 
                 for (int i = 0; i < subJobNoStrings.length; i++) {
                     Log.d("Tag", Arrays.toString(invoiceStrings[i]));
@@ -197,15 +198,16 @@ public class JobListActivity extends AppCompatActivity {
     }
 
     protected class JobListAdaptor extends BaseAdapter {
-        String[] numberStrings;
+        String[] numberStrings, subJobNoStrings;
         String[][] detailListStrings, arriveTimeStrings;
         JobListViewHolder jobListViewHolder;
         Context context;
 
-        public JobListAdaptor(String[] numberStrings, String[][] detailListStrings, String[][] arriveTimeStrings, Context context) {
+        public JobListAdaptor(String[] numberStrings, String[][] detailListStrings, String[][] arriveTimeStrings, String[] subJobNoStrings, Context context) {
             this.numberStrings = numberStrings;
             this.detailListStrings = detailListStrings;
             this.arriveTimeStrings = arriveTimeStrings;
+            this.subJobNoStrings = subJobNoStrings;
             this.context = context;
         }
 
@@ -244,7 +246,8 @@ public class JobListActivity extends AppCompatActivity {
                     Intent intent = new Intent(JobListActivity.this, ManageJobActivity.class);
                     intent.putExtra("Login", loginStrings);
                     intent.putExtra("Date", dateString);
-                    intent.putExtra("Position", position + 1);
+                    intent.putExtra("Position", "" + (position + 1));
+                    intent.putExtra("SubJobNo", subJobNoStrings[position]);
                     startActivity(intent);
                     Log.d("Tag", "Position ==> " + position);
 

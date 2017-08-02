@@ -2,10 +2,12 @@ package com.mist.it.pod_nk;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -13,10 +15,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by Yaowaluk on 27/07/2560.
+ * Created by Tunyaporn on 7/20/2017.
  */
 
-class ManageJobAdaptor extends BaseAdapter {
+public class ManageJobAdaptor extends BaseAdapter {
     Context context;
     String dateString,tripNoString, subJobNoString;
     String[] storeStrings, timeStrings, loginStrings;
@@ -110,3 +112,4 @@ class ManageJobAdaptor extends BaseAdapter {
         }
     }
 }
+

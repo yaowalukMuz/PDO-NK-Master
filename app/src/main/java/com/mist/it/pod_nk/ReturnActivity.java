@@ -32,7 +32,6 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.internal.Internal;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,8 +39,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -74,13 +71,13 @@ public class ReturnActivity extends AppCompatActivity {
     @BindView(R.id.lisRAItemList)
     ListView itemListView;
 
-
-    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings,loginStrings;
-    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings ,imgFileStrings;
+    private String invoiceNoString, subJobString, placeString, tripNoString, storeIdString, dateString;
+    private String[] invoiceNoStrings, imgFileNameStrings, subJobStrings, loginStrings;
+    private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings, imgFileStrings;
     private ArrayList<ReturnItem> returnItems = new ArrayList<ReturnItem>();
 
     private Uri firstUri, secondUri;
-    private boolean firstImgFlagABoolean,secondImgFlagABoolean, saveImgABoolean;
+    private boolean firstImgFlagABoolean, secondImgFlagABoolean, saveImgABoolean;
     private String pathFirstImgString, pathSecondImgString, imgFirstPathString, imgSecondPathString;
     private Criteria criteria;
     private Bitmap firstImgBitmap = null;
@@ -98,16 +95,22 @@ public class ReturnActivity extends AppCompatActivity {
         //1. Bind Widget
         ButterKnife.bind(this);
 
+        invoiceNoString = getIntent().getStringExtra("Invoice");
+        loginStrings = getIntent().getStringArrayExtra("Login");
+        subJobString = getIntent().getStringExtra("SubJobNo");
+        dateString = getIntent().getStringExtra("Date");
+        tripNoString = getIntent().getStringExtra("Position");
+        placeString = getIntent().getStringExtra("Place");
+        storeIdString = getIntent().getStringExtra("StoreId");
+
         //Set flag img
         firstImgFlagABoolean = false;
         secondImgFlagABoolean = false;
         saveImgABoolean = false;
 
 
-
-
         // 2.create class for synDataAdaptor to listview
-        SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, "", "", returnItems);
+        SynJobDtlProduct synJobDtlProduct = new SynJobDtlProduct(this, subJobString, invoiceNoString, returnItems);
         synJobDtlProduct.execute(urlGetJobDetailProduct);
 
 
@@ -115,12 +118,12 @@ public class ReturnActivity extends AppCompatActivity {
 
 
     //Set On Click Listener
-    @OnClick({R.id.btnRASave, R.id.btnRAReturnAll, R.id.btnRAConfirm,R.id.imgRAOne,R.id.imgRATwo})
+    @OnClick({R.id.btnRASave, R.id.btnRAReturnAll, R.id.btnRAConfirm, R.id.imgRAOne, R.id.imgRATwo})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btnRASave:
                 if (pathFirstImgString != null) {
-                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, firstImgBitmap,invoiceNoStrings[0].toString(),"","inv_first.png");
+                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, firstImgBitmap, invoiceNoStrings[0].toString(), subJobString, "inv_first.png");
                     synUploadImage.execute();
                     if (saveImgABoolean) {
 
@@ -128,10 +131,10 @@ public class ReturnActivity extends AppCompatActivity {
                         firstImgFlagABoolean = true;
                         pathFirstImgString = null;
                         saveImgABoolean = false;
-                       // checkPictureBeforeConfirm();
                     }
-                } else if (pathSecondImgString != null) {
-                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, secondImgBitmap,invoiceNoStrings[0].toString(),"","inv_second.png");
+                }
+                if (pathSecondImgString != null) {
+                    SynUploadImage synUploadImage = new SynUploadImage(ReturnActivity.this, secondImgBitmap, invoiceNoStrings[0].toString(), subJobString, "inv_second.png");
                     synUploadImage.execute();
                     if (saveImgABoolean) {
 
@@ -139,7 +142,6 @@ public class ReturnActivity extends AppCompatActivity {
                         saveImgABoolean = false;
                         pathSecondImgString = null;
                         firstImgFlagABoolean = true;
-//                        checkPictureBeforeConfirm();
                     }
                 }
 
@@ -156,23 +158,23 @@ public class ReturnActivity extends AppCompatActivity {
                 confirmReturnAllViewHolder.imgRtnAImageView.setImageResource(R.drawable.caution);
                 confirmReturnAllViewHolder.headerRtnTextView.setText("return all product");
                 confirmReturnAllViewHolder.descriptRtnTextView.setText("Are you sure return all...?");
-                builder.setPositiveButton(getResources().getText(R.string.OK), new DialogInterface.OnClickListener(){
+                builder.setPositiveButton(getResources().getText(R.string.OK), new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SyncReturnAll syncReturnAll = new SyncReturnAll(ReturnActivity.this, invoiceNoStrings[0]);
-                                syncReturnAll.execute(urlSaveQuantityReturnAll);
-                               // if() {
-                                    for (int i = 0; i < returnItems.size(); i++) {
-                                        returnItems.get(i).setRetrunAmountString(returnItems.get(i).getAmountString());
-                                    }
-                                ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SyncReturnAll syncReturnAll = new SyncReturnAll(ReturnActivity.this, invoiceNoStrings[0]);
+                        syncReturnAll.execute(urlSaveQuantityReturnAll);
+                        // if() {
+                        for (int i = 0; i < returnItems.size(); i++) {
+                            returnItems.get(i).setRetrunAmountString(returnItems.get(i).getAmountString());
+                        }
+                        ReturnProductAdaptor returnProductAdaptor = new ReturnProductAdaptor(ReturnActivity.this, returnItems);
 
-                                itemListView.setAdapter(returnProductAdaptor);
-                               // }
-                            }
-                        });
-                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener(){
+                        itemListView.setAdapter(returnProductAdaptor);
+                        // }
+                    }
+                });
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -190,7 +192,7 @@ public class ReturnActivity extends AppCompatActivity {
                 break;
 
             case R.id.imgRAOne:
-                if(!firstImgFlagABoolean){
+                if (!firstImgFlagABoolean) {
                     File originalFile1 = new File(Environment.getExternalStorageDirectory() + "/DCIM/", "inv_first.png");
 
                     Intent cameraIntent1 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -202,12 +204,12 @@ public class ReturnActivity extends AppCompatActivity {
 
             case R.id.imgRATwo:
                 if (!secondImgFlagABoolean) {
-                    File orignalFile2 = new File(Environment.getExternalStorageDirectory()  + "/DCIM/", "inv_second.png");
+                    File orignalFile2 = new File(Environment.getExternalStorageDirectory() + "/DCIM/", "inv_second.png");
 
                     Intent cameraIntent2 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     secondUri = Uri.fromFile(orignalFile2);
                     cameraIntent2.putExtra(MediaStore.EXTRA_OUTPUT, secondUri);
-                    startActivityForResult(cameraIntent2,2);
+                    startActivityForResult(cameraIntent2, 2);
                 }
                 break;
         }
@@ -264,15 +266,11 @@ public class ReturnActivity extends AppCompatActivity {
         builder.setView(view1);
         builder.show();
 
-
     }
 
 
     //inner class for syn data from adaptor
     protected class SynJobDtlProduct extends AsyncTask<String, Void, String> {
-
-//        private String[][] modelStrings, amountStrings, detailStrings, returnAmountStrings, invoiceNoSeqStrings;
-//        private String[] invoiceNoStrings, subJobStrings, imgFileNameStrings;
         //Explicit
         private Context context;
         private String subjob_no, invoiceNo;
@@ -288,8 +286,10 @@ public class ReturnActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             try {
+                Log.d("TAG", "Send ==> " + subjob_no + " , " + invoiceNo);
                 OkHttpClient okHttpClient = new OkHttpClient();
-                RequestBody requestBody = new FormEncodingBuilder().add("isAdd", "true")
+                RequestBody requestBody = new FormEncodingBuilder()
+                        .add("isAdd", "true")
                         .add("subjob_no", subjob_no)
                         .add("invoiceNo", invoiceNo).build();
 
@@ -307,7 +307,7 @@ public class ReturnActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-           // Log.d("Tag", "onPostExecute: " + s);
+            Log.d("Tag", "onPostExecute: " + s);
 
             try {
                 JSONObject jsonObject = new JSONObject(s);
@@ -363,12 +363,16 @@ public class ReturnActivity extends AppCompatActivity {
                     imgFileStrings[i] = new String[invoiceImgArray.length()];
 
 
-                  // for(int k = 0;k < invoiceImgArray.length();k++) {
-                        JSONObject jsonObject3 = invoiceImgArray.getJSONObject(0);
-                        JSONObject jsonObject4 = invoiceImgArray.getJSONObject(1);
-                           imgFirstPathString = jsonObject3.getString("ImgPath");
-                            imgSecondPathString =jsonObject4.getString("ImgPath");
-                   // }
+                    for (int k = 0; k < invoiceImgArray.length(); k++) {
+                        JSONObject jsonObject3 = invoiceImgArray.getJSONObject(k);
+                        if (k == 0) {
+
+                            imgFirstPathString = jsonObject3.getString("ImgPath");
+                        } else if (k == 1) {
+
+                            imgSecondPathString = jsonObject3.getString("ImgPath");
+                        }
+                    }
 
                     Log.d("Tag", "imgFirstPathString: " + imgFirstPathString);
                 }
@@ -383,9 +387,14 @@ public class ReturnActivity extends AppCompatActivity {
                 //firstImageView.setImageBitmap();
                 Log.d("Tag", "Image Path :::  " + serverString + projectString + "/app/CenterService/" + imgFirstPathString);
 
-                Glide.with(ReturnActivity.this).load(serverString + projectString +"/app/CenterService/" + imgFirstPathString ).into(firstImageView);
-                Glide.with(ReturnActivity.this).load(serverString + projectString +"/app/CenterService/" + imgSecondPathString ).into(secondImageView);
-//
+                if ((!imgFirstPathString.equals("null")) && (imgFirstPathString.contains("inv_first"))) {
+                    Glide.with(ReturnActivity.this).load(serverString + projectString + "/app/CenterService/" + imgFirstPathString).into(firstImageView);
+                }
+
+                if ((!imgSecondPathString.equals("null")) &&  (imgSecondPathString.contains("inv_second"))) {
+                    Glide.with(ReturnActivity.this).load(serverString + projectString + "/app/CenterService/" + imgSecondPathString).into(secondImageView);
+                }
+
 
             } catch (Exception e) {
                 Log.d("Tag", "onPostExecute: " + e + " Line: " + e.getStackTrace()[0].getLineNumber());
@@ -432,8 +441,8 @@ public class ReturnActivity extends AppCompatActivity {
                 OkHttpClient okHttpClient = new OkHttpClient();
                 RequestBody requestBody = new FormEncodingBuilder()
                         .add("isAdd", "true")
-                        .add("user_name", "70-4997")
-                        .add("subjob_no", "ND-170517-0050")
+                        .add("user_name", loginStrings[5])
+                        .add("subjob_no", subJobString)
                         .add("invoiceNo", invoiceNoString)
                         .add("invoiceSeq", invoiceSeqString)
                         .add("model", modelString)
@@ -471,9 +480,9 @@ public class ReturnActivity extends AppCompatActivity {
                 OkHttpClient okHttpClient = new OkHttpClient();
                 RequestBody requestBody = new FormEncodingBuilder()
                         .add("isAdd", "true")
-                        .add("truck_id", "NK-006")
-                        .add("subjob_no", "ND-170608-0013")
-                        .add("user_name", "70-4997")
+                        .add("truck_id", loginStrings[0])
+                        .add("subjob_no", subJobString)
+                        .add("user_name", loginStrings[5])
                         .add("gps_timeStamp", gpsManager.getDateTime())
                         .add("invoiceNo", invoiceNoString).build();
                 Request.Builder builder = new Request.Builder();
@@ -497,27 +506,26 @@ public class ReturnActivity extends AppCompatActivity {
     //////// onResult of image /////////////
 
 
-
-     @Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-         switch (requestCode) {
-             case 1: // From take  photo
-                 if (resultCode == RESULT_OK) {
-                   pathFirstImgString = firstUri.getPath().toString();
+        switch (requestCode) {
+            case 1: // From take  photo
+                if (resultCode == RESULT_OK) {
+                    pathFirstImgString = firstUri.getPath().toString();
 
-                     try {
-                         firstImgBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(firstUri));
-                         if (firstImgBitmap.getHeight() < firstImgBitmap.getWidth()) {
-                             firstImgBitmap = rotateBitmap(firstImgBitmap);
-                         }
-                         firstImageView.setImageBitmap(firstImgBitmap);
-                     } catch (FileNotFoundException e) {
-                         e.printStackTrace();
-                     }
-                 }
-            break;
+                    try {
+                        firstImgBitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(firstUri));
+                        if (firstImgBitmap.getHeight() < firstImgBitmap.getWidth()) {
+                            firstImgBitmap = rotateBitmap(firstImgBitmap);
+                        }
+                        firstImageView.setImageBitmap(firstImgBitmap);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
             case 2:
                 if (resultCode == RESULT_OK) {
                     pathSecondImgString = secondUri.getPath().toString();
@@ -533,9 +541,9 @@ public class ReturnActivity extends AppCompatActivity {
                     }
                 }
 
-            break;
+                break;
 
-         }
+        }
     }
 
     static class DialogViewHolder {
@@ -582,7 +590,7 @@ public class ReturnActivity extends AppCompatActivity {
     private class SynUploadImage extends AsyncTask<Void, Void, String> {
         private Context context;
         private Bitmap bitmap;
-        private String invoiceNoString,subjobNoString,mFileNameString;
+        private String invoiceNoString, subjobNoString, mFileNameString;
         private UploadImageUtils uploadImageUtils;
 
         ProgressDialog progressDialog;
@@ -598,42 +606,25 @@ public class ReturnActivity extends AppCompatActivity {
         }
 
 
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            progressDialog = new ProgressDialog(context);
-//            progressDialog.setMessage(getResources().getString(R.string.loading));
-//            progressDialog.setCancelable(false);
-//            progressDialog.show();
-//
-//            progressRunnable = new Runnable() {
-//                @Override
-//                public void run() {
-//                    progressDialog.cancel();
-//                }
-//            };
-//        }
-
-
 
         @Override
         protected String doInBackground(Void... params) {
 
             uploadImageUtils = new UploadImageUtils();
-            final String result = uploadImageUtils.uploadFile(mFileNameString,urlUploadPicture,bitmap,"0","I");
-            if(result=="NOK"){
+            final String result = uploadImageUtils.uploadFile(mFileNameString, urlUploadPicture, bitmap, "0", "I",subjobNoString, invoiceNoString);
+            if (result == "NOK") {
                 return "NOK";
 
-            }else{
+            } else {
                 try {
                     GPSManager gpsManager = new GPSManager(ReturnActivity.this);
                     OkHttpClient okHttpClient = new OkHttpClient();
                     RequestBody requestBody = new FormEncodingBuilder()
                             .add("isAdd", "true")
-                            .add("subjob_no", "ND-170608-0013")
+                            .add("subjob_no", subJobString)
                             .add("invoiceNo", invoiceNoString)
                             .add("File_Name", result)
-                            .add("user_name", "70-4997")
+                            .add("user_name", loginStrings[5])
                             .add("gps_timeStamp", gpsManager.getDateTime())
                             .build();
                     Request.Builder builder = new Request.Builder();
@@ -659,14 +650,14 @@ public class ReturnActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context,getResources().getText(R.string.save_img_success),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, getResources().getText(R.string.save_img_success), Toast.LENGTH_SHORT).show();
                     }
                 });
-            }else{
+            } else {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context,getResources().getText(R.string.save_img_unsuccessful),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, getResources().getText(R.string.save_img_unsuccessful), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -683,8 +674,3 @@ public class ReturnActivity extends AppCompatActivity {
         return bmp;
     }
 }
-
-
-
-
-

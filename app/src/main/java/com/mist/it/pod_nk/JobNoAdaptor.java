@@ -11,11 +11,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by Yaowaluk on 27/07/2560.
- */
-
-class JobNoAdaptor extends BaseAdapter {
+public class JobNoAdaptor extends BaseAdapter {
     Context context;
     String[] jobNoStrings;
     String[][] invoiceStrings, amountStrings;
@@ -72,3 +68,4 @@ class JobNoAdaptor extends BaseAdapter {
         }
     }
 }
+
